@@ -21,13 +21,13 @@ let receitaSchema = new mongoose.Schema({
     },
     ingredientes: [
         {
-            nome: { required: [true, "O ingrediente precisa de um nome"] },
+            nome: { type: String, required: [true, "O ingrediente precisa de um nome"] },
             quantidade: { type: String }
         }
     ],
     autor: {
-        nome: { required: [true, "O nome do autor é obrigatório"] },
-        email: { required: [true, "O email do autor é obrigatório"] }
+        nome: { type: String, required: [true, "O nome do autor é obrigatório"] },
+        email: { type: String, required: [true, "O email do autor é obrigatório"] }
     },
 }, { timestamps: true })
 
