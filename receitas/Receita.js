@@ -30,3 +30,7 @@ let receitaSchema = new mongoose.Schema({
         email: { required: [true, "O email do autor é obrigatório"] }
     },
 }, { timestamps: true })
+
+let Receita = mongoose.model("Receita", receitaSchema)
+
+export default Receita
