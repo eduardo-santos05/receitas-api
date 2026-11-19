@@ -69,7 +69,71 @@ router.post("/login", async (req, res) => {
     res.send({ token: token })
 })
 
+router.get("/receitas", async (req, res) => {
+    let receitas = await Receita.find()
+    res.send(receitas)
+})
 
-router.listen(port, ()=>{
+router.get("/receitas/:id", async (req, res) => {
+    try {
+        let receita = await Receita.findById(req.params.id)
+        if (receita === null) {
+            return res.status(404).send({ erro: "Receita não encontrada" })
+        }
+        res.send(receita)
+    } catch (erro) {
+        res.status(400).send({ erro: erro.message })
+    }
+})
+
+router.get("/minhas-receitas", autenticar, async (req, res) => {
+    let receitas = await Receita.find({"autor.email": req.usuario.email})
+    res.send(receitas)
+})
+
+router.post("/receitas", autenticar, async (req, res) => {
+    try {
+        req.body.autor = { nome: req.usuario.nome, email: req.usuario.email }
+        let receita = await Receita.create(req.body)
+        res.status(201).send(receita)
+    } catch (erro) {
+        res.status(400).send({ erro: erro.message })
+    }
+})
+
+router.put("/receitas/:id", autenticar, async (req, res) => {
+    try {
+        delete req.body.autor
+        let receita = await Receita.findById(req.params.id)
+        if (receita === null) {
+            return res.status(404).send({ erro: "Receita não encontrada" })
+        }
+        if (receita.autor.email !== req.usuario.email) {
+            return res.status(403).send({ erro: "Você só pode editar as suas receitas" })
+        }
+        await Receita.findByIdAndUpdate(req.params.id, req.body)
+        res.send({ mensagem: "Receita atualizada." })
+    } catch (erro) {
+        res.status(400).send({ erro: erro.message })
+    }
+})
+
+router.delete("/receitas/:id", autenticar, async (req, res) => {
+    try {
+        let receita = await Receita.findById(req.params.id)
+        if (receita === null) {
+            return res.status(404).send({ erro: "Receita não encontrada" })
+        }
+        if (receita.autor.email !== req.usuario.email) {
+            return res.status(403).send({ erro: "Você só pode apagar as suas receitas" })
+        }
+        await Receita.findByIdAndDelete(req.params.id)
+        res.send({ mensagem: "Receita removida." })
+    } catch (erro) {
+        res.status(400).send({ erro: erro.message })
+    }
+})
+
+router.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`)
 })
